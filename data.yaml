@@ -1,0 +1,10 @@
+path: E:/programming/y/RDD_SPLIT # корневой путь к датасету
+train: train/images # путь к картинкам для обучения
+val: val/images     # путь к картинкам для валидации
+test: test/images   # путь к тестовым картинкам (опционально)
+
+names:
+  0: D00
+  1: D10
+  2: D20
+  3: D40
