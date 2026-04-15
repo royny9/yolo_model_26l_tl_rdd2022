@@ -1,36 +1,36 @@
-import pandas as pd
-import matplotlib.pyplot as plt
 import os
+import matplotlib.pyplot as plt
 
-
-
-dir_labels = os.listdir('RDD_SPLIT/train/labels')
-# print(type(dir_labels))
-
+dir_path = 'RDD_SPLIT/val/labels'
+dir_labels = os.listdir(dir_path)
 
 hash_cls_card = dict()
-tw = 0
 
-for i in  dir_labels:
-    with open(f'RDD_SPLIT/train/labels/{i}', 'r') as file:
-        s = file.readlines()
-        if len(s) >0:
-            cls_idx = s[0][0]
-            tw = max(tw, int(cls_idx))
-            if cls_idx in hash_cls_card:
-               hash_cls_card[cls_idx] += 1
-            else:
-                hash_cls_card[cls_idx] = 1
+for filename in dir_labels:
+    if not filename.endswith('.txt'): continue
+    
+    with open(os.path.join(dir_path, filename), 'r') as file:
+        for line in file:
+            line = line.strip() # Убираем лишние пробелы и переносы \n
+            if not line:
+                continue 
             
-print(hash_cls_card)
+            parts = line.split()
+            cls_idx = parts[0]
+            
+            hash_cls_card[cls_idx] = hash_cls_card.get(cls_idx, 0) + 1
 
-print(tw)
+print("Статистика классов:", hash_cls_card)
 
-plt.bar(hash_cls_card.keys(), hash_cls_card.values(), color='skyblue')
 
-plt.xlabel('cls')
-plt.ylabel('value')
+sorted_keys = sorted(hash_cls_card.keys(), key=int)
+sorted_values = [hash_cls_card[k] for k in sorted_keys]
+
+plt.bar(sorted_keys, sorted_values, color='skyblue')
+plt.xlabel('Класс (ID)')
+plt.ylabel('Количество объектов')
+plt.title('Распределение дефектов в датасете')
 plt.show()
 
-
-'''очень сильный дисбаланс класса 0'''
+'''очень сильный дисбаланс класса 0
+4 класс - износ разметки не учитываем D44 '''
