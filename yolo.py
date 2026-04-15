@@ -1,21 +1,39 @@
 from ultralytics import YOLO
 
 def main():
-    model = YOLO("yolo26l.pt")
+    model = YOLO("runs/detect/train23/weights/best.pt")
 
 
-    results =   model.train(
-        data="data.yaml", 
-        epochs=30, 
-        imgsz=388, 
-        batch=16, 
-        workers=4, 
-        device=0,  # Явно указываем GPU
-        exist_ok=True
-    )
-
-
-    results = model("E:/programming/y/RDD_SPLIT/test/images/China_Drone_000550.jpg")
+    results = model.train(
+    data="data.yaml", 
+    epochs=100,
+    imgsz=800,          # Оптимально для баланса точности и памяти
+    batch=4,  
+    lr0=0.0005,         # УМЕНЬШИТЬ в 20 раз (было 0.01), чтобы не портить веса
+    lrf=0.01,   
+    optimizer='SGD',
+    warmup_epochs=3,        
+    # --- Улучшение видимости ---
+    rect=True,          # ОЧЕНЬ ВАЖНО для дорог: сохраняет пропорции фото
+    # --- Тюнинг потерь (Loss) ---
+    box=6.0,           # Сильнее штрафуем за промах рамки мимо ямы
+    cls=2.5,            # Усиливаем внимание к правильности класса
+    # --- Ваша аугментация (немного поправленная) ---
+    hsv_h=0.015,
+    hsv_s=0.7,
+    hsv_v=0.4,
+    degrees=5.0,        # Уменьшил поворот, дороги редко наклонены на 10 град.
+    translate=0.1,
+    scale=0.5,
+    flipud=0.0,
+    fliplr=0.5,
+    mosaic=1.0,         # Оставляем, это база
+    mixup=0.05,          # Уменьшил, чтобы не "замыливать" мелкие ямы
+    copy_paste=0.6,     # Увеличил: чаще копируем ямы на разные участки дорог
+    # --- Ресурсы ---
+    workers=4,
+    amp=True            # Смешанная точность (экономит память без потери качества)
+)
 
 if __name__ == '__main__':
     main()
